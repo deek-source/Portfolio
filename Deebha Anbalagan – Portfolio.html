@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Deebha Anbalagan Portfolio</title>
+<meta name="description" content="Deebha Anbalagan: agricultural engineer and MSc student at University College Cork, working across agri-food sustainability, supply chain and GIS.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700;800&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
+<style>
+  /* Layout idea: a field survey sheet. Thin ruled grid, plot-numbered sections,
+     an NDVI scale as the signature strip, contour lines drawn on canvas. */
+  :root{
+    --paper:#FAFBF8;
+    --sheet:#FFFFFF;
+    --ink:#16241B;
+    --muted:#5A6B60;
+    --rule:#DDE5DE;
+    --green:#1E6B45;
+    --sage:#EEF4EF;
+    --display:'Sora', 'Segoe UI', system-ui, sans-serif;
+    --body:'DM Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    --mono:'DM Sans', system-ui, 'Segoe UI', sans-serif;
+    --max:1200px;
+    color-scheme:light;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{background:var(--paper);color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.65;-webkit-font-smoothing:antialiased}
+  a{color:inherit}
+  a:focus-visible,button:focus-visible{outline:2px solid var(--green);outline-offset:3px;border-radius:2px}
+  h1,h2,h3{font-weight:700;text-wrap:balance;letter-spacing:-.025em}
+  h1 i,h2 i,.mark i,.lede em{font-style:normal}
+  .wrap{max-width:var(--max);margin:0 auto;padding:0 32px}
+  .mono{font-family:var(--mono);font-weight:600;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+  .num{font-variant-numeric:tabular-nums}
+
+  /* ---------- NAV ---------- */
+  nav{position:sticky;top:0;z-index:20;background:rgba(250,251,248,.88);backdrop-filter:saturate(1.4) blur(10px);border-bottom:1px solid var(--rule)}
+  nav .wrap{display:flex;align-items:center;justify-content:space-between;height:60px;gap:24px}
+  .mark{font-family:var(--display);font-weight:800;font-size:22px;text-decoration:none;line-height:1}
+  .mark i{color:var(--green)}
+  .navlinks{display:flex;gap:28px;list-style:none}
+  .navlinks a{text-decoration:none;font-size:14px;font-weight:600;color:var(--muted);transition:color .2s}
+  .navlinks a:hover{color:var(--green)}
+  .navlinks a span{font-family:var(--mono);font-size:11px;margin-right:6px;color:var(--green)}
+  .coord{white-space:nowrap}
+
+  /* ---------- HERO ---------- */
+  .hero{position:relative;border-bottom:1px solid var(--rule);overflow:hidden}
+  #contours{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+  .hero .wrap{position:relative;display:grid;grid-template-columns:1.35fr 1fr;gap:48px;padding-top:88px;padding-bottom:72px}
+  .hero .meta{display:flex;gap:18px;flex-wrap:wrap;margin-bottom:28px}
+  .dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--green);margin-right:8px;box-shadow:0 0 0 4px rgba(30,107,69,.14);vertical-align:1px}
+  .hero h1{font-family:var(--display);font-size:clamp(52px,8vw,108px);font-weight:800;line-height:1;letter-spacing:-.04em}
+  .hero h1 i{color:var(--green)}
+  .hero .tagline{font-size:clamp(18px,2vw,21px);color:var(--muted);max-width:30em;margin-top:28px}
+  .hero .tagline b{color:var(--ink);font-weight:600}
+  .cta{display:flex;gap:12px;margin-top:36px;flex-wrap:wrap}
+  .btn{display:inline-flex;align-items:center;gap:10px;padding:13px 22px;font-weight:600;font-size:15px;text-decoration:none;border-radius:999px;transition:background .2s,color .2s,transform .2s}
+  .btn:hover{transform:translateY(-1px)}
+  .btn.solid{background:var(--green);color:var(--sheet)}
+  .btn.solid:hover{background:var(--ink)}
+  .btn.ghost{border:1px solid var(--ink)}
+  .btn.ghost:hover{background:var(--ink);color:var(--sheet)}
+  .arrow{font-family:var(--mono)}
+
+  .facts{align-self:end;background:var(--sheet);border:1px solid var(--rule);border-radius:4px}
+  .facts .row{display:grid;grid-template-columns:120px 1fr;gap:16px;padding:16px 22px;border-top:1px solid var(--rule);font-size:15px}
+  .facts .row:first-child{border-top:none}
+  .facts .row b{font-weight:600}
+  .facts .head{display:flex;justify-content:space-between;padding:12px 22px;background:var(--sage);border-bottom:1px solid var(--rule)}
+
+  /* ---------- NDVI STRIP ---------- */
+  .ndvi{border-bottom:1px solid var(--rule);background:var(--sheet)}
+  .ndvi .wrap{display:grid;grid-template-columns:200px 1fr;gap:32px;align-items:center;padding-top:22px;padding-bottom:22px}
+  .scale{position:relative}
+  .bar{height:10px;border-radius:999px;background:linear-gradient(90deg,#B8A48C 0%,#D7CFA6 18%,#C9DDA6 38%,#8FC28A 58%,#3E9160 78%,#1E6B45 100%)}
+  .ticks{display:flex;justify-content:space-between;margin-top:8px}
+
+  /* ---------- SECTIONS ---------- */
+  section.block{border-bottom:1px solid var(--rule)}
+  section.block > .wrap{display:grid;grid-template-columns:200px 1fr;gap:32px;padding-top:96px;padding-bottom:96px}
+  .label{position:sticky;top:96px;align-self:start;display:flex;flex-direction:column;gap:6px}
+  .label .plot{font-family:var(--mono);font-weight:700;font-size:13px;color:var(--green);letter-spacing:.06em}
+  .label .name{font-family:var(--mono);font-weight:600;font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+  h2{font-family:var(--display);font-size:clamp(34px,4.4vw,54px);line-height:1.08;margin-bottom:40px}
+  h2 i{color:var(--green)}
+  .prose{max-width:62ch}
+  .prose p+p{margin-top:16px}
+  .lede{font-size:clamp(21px,2.3vw,26px);line-height:1.45;max-width:30em;margin-bottom:28px}
+  .lede em{font-weight:700;color:var(--green)}
+
+  /* now: three columns separated by rules */
+  .triad{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--ink)}
+  .triad > div{padding:24px 28px 8px 0}
+  .triad > div + div{padding-left:28px;border-left:1px solid var(--rule)}
+  .triad h3{font-family:var(--display);font-size:22px;line-height:1.25;margin:10px 0 12px}
+  .triad p{color:var(--muted);font-size:16px}
+
+  /* skills: ledger columns */
+  .ledger{display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid var(--ink)}
+  .ledger > div{padding:22px 22px 4px 0}
+  .ledger > div + div{padding-left:22px;border-left:1px solid var(--rule)}
+  .ledger h3{font-size:16px;font-weight:700;margin-bottom:14px;font-family:var(--display);color:var(--green)}
+  .ledger ul{list-style:none}
+  .ledger li{font-size:15.5px;padding:7px 0;border-bottom:1px dashed var(--rule)}
+  .ledger li:last-child{border-bottom:none}
+
+  /* experience rows */
+  .jobs{border-top:1px solid var(--ink)}
+  .job{display:grid;grid-template-columns:170px 1fr auto;gap:28px;padding:30px 0;border-bottom:1px solid var(--rule);transition:background .25s}
+  .job:hover{background:linear-gradient(90deg,var(--sage),transparent 70%)}
+  .job h3{font-family:var(--display);font-size:26px;line-height:1.15}
+  .job .role{font-weight:600;color:var(--green);margin:6px 0 12px;font-size:15.5px}
+  .job ul{padding-left:18px;color:var(--ink);max-width:62ch}
+  .job li{margin-bottom:6px;font-size:16px}
+  .job li::marker{color:var(--green)}
+  .tags{display:flex;flex-wrap:wrap;gap:6px;justify-content:flex-end;max-width:240px;align-content:flex-start}
+  .tag{font-family:var(--mono);font-weight:600;font-size:12.5px;padding:4px 9px;border:1px solid var(--rule);border-radius:999px;color:var(--muted);background:var(--sheet);white-space:nowrap}
+
+  /* practice table */
+  .tablewrap{overflow-x:auto;border-top:1px solid var(--ink)}
+  table{width:100%;border-collapse:collapse;min-width:640px}
+  th{text-align:left;font-family:var(--mono);font-weight:500;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);padding:14px 16px 14px 0}
+  td{padding:16px 16px 16px 0;border-top:1px solid var(--rule);font-size:16px;vertical-align:top}
+  td:first-child{font-weight:600}
+  td:last-child{color:var(--muted)}
+  td .hl{color:var(--green);font-weight:600}
+
+  /* projects */
+  .proj{display:grid;grid-template-columns:1fr 300px;gap:40px;padding:36px 0;border-top:1px solid var(--rule)}
+  .proj:first-of-type{border-top:1px solid var(--ink)}
+  .proj h3{font-family:var(--display);font-size:clamp(24px,2.6vw,32px);line-height:1.15;margin:10px 0 14px}
+  .proj p{max-width:58ch}
+  .proj .tools{display:flex;flex-wrap:wrap;gap:6px;margin-top:18px}
+  .figure{border-left:1px solid var(--rule);padding-left:32px;display:flex;flex-direction:column;justify-content:center}
+  .figure .big{font-family:var(--display);font-size:clamp(56px,6vw,84px);font-weight:800;line-height:1;color:var(--green);letter-spacing:-.04em}
+  .figure .unit{margin-top:12px;font-size:15px;color:var(--muted);max-width:24ch}
+
+  /* next: planned plots */
+  .plans{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+  .plan{background:var(--sheet);border:1px dashed #B9C9BD;border-radius:4px;padding:24px;display:flex;flex-direction:column;gap:12px}
+  .plan h3{font-family:var(--display);font-size:20px;line-height:1.25}
+  .plan p{font-size:15.5px;color:var(--muted)}
+  .plan .status{display:flex;justify-content:space-between}
+  .plan .builds{margin-top:auto;padding-top:12px;border-top:1px solid var(--rule);font-size:14px}
+
+  /* value */
+  .values{display:grid;grid-template-columns:repeat(2,1fr);column-gap:48px;border-top:1px solid var(--ink)}
+  .value{display:grid;grid-template-columns:44px 1fr;gap:12px;padding:22px 0;border-bottom:1px solid var(--rule)}
+  .value .n{font-family:var(--display);font-weight:700;font-size:15px;color:var(--green);padding-top:6px}
+  .value h3{font-family:var(--display);font-weight:700;font-size:18px;margin-bottom:4px}
+  .value p{color:var(--muted);font-size:16px}
+
+  /* credentials */
+  .creds{display:grid;grid-template-columns:1fr 1fr;gap:48px;border-top:1px solid var(--ink);padding-top:24px}
+  .creds h3{font-family:var(--mono);font-size:12.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:10px;font-weight:500}
+  .creds ul{list-style:none}
+  .creds li{padding:12px 0;border-bottom:1px solid var(--rule);font-size:16px;display:flex;justify-content:space-between;gap:16px}
+  .creds li span{color:var(--muted);text-align:right;font-size:14.5px}
+
+  /* contact */
+  .contact{background:var(--green);color:var(--sheet);position:relative;overflow:hidden}
+  .contact .wrap{position:relative;padding-top:110px;padding-bottom:90px}
+  .contact .mono{color:#CFE3D6}
+  .contact h2{font-size:clamp(44px,7vw,92px);font-weight:800;margin:16px 0 28px}
+  .contact h2 i{color:#CFE3D6}
+  .mail{font-family:var(--display);font-weight:700;font-size:clamp(22px,3.2vw,40px);text-decoration:none;border-bottom:1px solid rgba(255,255,255,.4);transition:border-color .2s;word-break:break-word}
+  .mail:hover{border-color:#FFFFFF}
+  .clist{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:56px;padding-top:24px;border-top:1px solid rgba(255,255,255,.25)}
+  .clist div{display:flex;flex-direction:column;gap:6px}
+  .clist a{text-decoration:none;font-weight:600}
+  .clist a:hover{text-decoration:underline}
+  footer{background:var(--ink);color:#B9C9BD}
+  footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;padding-top:22px;padding-bottom:22px}
+  footer .mono{color:#B9C9BD}
+
+  /* ---------- RESPONSIVE ---------- */
+  @media (max-width:1020px){
+    .navlinks{display:none}
+    .hero .wrap{grid-template-columns:1fr}
+    section.block > .wrap,.ndvi .wrap{grid-template-columns:1fr;gap:16px}
+    .label{position:static;flex-direction:row;gap:14px}
+    .ledger{grid-template-columns:repeat(2,1fr)}
+    .ledger > div:nth-child(3){border-left:none;padding-left:0}
+    .ledger > div{border-top:1px solid var(--rule)}
+    .plans{grid-template-columns:1fr 1fr}
+    .job{grid-template-columns:140px 1fr}
+    .tags{grid-column:2;justify-content:flex-start;max-width:none}
+  }
+  @media (max-width:680px){
+    .wrap{padding:0 20px}
+    .coord{display:none}
+    section.block > .wrap{padding-top:64px;padding-bottom:64px}
+    .triad,.ledger,.plans,.values,.creds,.clist{grid-template-columns:1fr}
+    .triad > div + div,.ledger > div + div{padding-left:0;border-left:none;border-top:1px solid var(--rule)}
+    .job{grid-template-columns:1fr;gap:10px}
+    .tags{grid-column:auto}
+    .proj{grid-template-columns:1fr;gap:20px}
+    .figure{border-left:none;padding-left:0;border-top:1px solid var(--rule);padding-top:20px}
+    .facts .row{grid-template-columns:1fr;gap:2px}
+  }
+  @media (prefers-reduced-motion:reduce){
+    html{scroll-behavior:auto}
+    *{transition:none !important}
+  }
+</style>
+</head>
+<body>
+
+<nav aria-label="Main">
+  <div class="wrap">
+    <a class="mark" href="#top">Deebha <i>A.</i></a>
+    <ul class="navlinks">
+      <li><a href="#about"><span>01</span>About</a></li>
+      <li><a href="#skills"><span>03</span>Skills</a></li>
+      <li><a href="#experience"><span>04</span>Experience</a></li>
+      <li><a href="#projects"><span>06</span>Projects</a></li>
+      <li><a href="#contact"><span>10</span>Contact</a></li>
+    </ul>
+  </div>
+</nav>
+
+<!-- HERO -->
+<header class="hero" id="top">
+  <canvas id="contours" aria-hidden="true"></canvas>
+  <div class="wrap">
+    <div>
+      <div class="meta">
+        <span class="mono"><span class="dot"></span>Available immediately</span>
+        <span class="mono">Portfolio · 2026</span>
+      </div>
+      <h1>Deebha<br><i>Anbalagan</i></h1>
+      <p class="tagline">Agricultural engineer working where <b>farming, supply chains and sustainability</b> meet. MSc student at University College Cork.</p>
+      <div class="cta">
+        <a class="btn solid" href="#projects">See my projects <span class="arrow">→</span></a>
+        <a class="btn ghost" href="#contact">Get in touch</a>
+      </div>
+    </div>
+    <div class="facts" aria-label="Quick facts">
+      <div class="head"><span class="mono">Field record</span><span class="mono num">No. 001</span></div>
+      <div class="row"><span class="mono">Focus</span><span>Agri-food sustainability · Supply chain · GIS</span></div>
+      <div class="row"><span class="mono">Study</span><span>MSc Sustainable Development, Agri-Food &amp; Co-operatives, UCC</span></div>
+      <div class="row"><span class="mono">Degree</span><span>B.Tech Agricultural Engineering · <b class="num">CGPA 8.70 / 10</b></span></div>
+      <div class="row"><span class="mono">Fieldwork</span><span><b class="num">4</b> industry internships · <b class="num">3</b> academic projects</span></div>
+      <div class="row"><span class="mono">Region</span><span>Cork &amp; Munster · open to relocation</span></div>
+    </div>
+  </div>
+</header>
+
+<!-- NDVI STRIP -->
+<div class="ndvi" aria-label="NDVI scale, a measure of crop health I map in GIS">
+  <div class="wrap">
+    <span class="mono">NDVI · crop vigour</span>
+    <div class="scale">
+      <div class="bar"></div>
+      <div class="ticks mono num"><span>−0.1 bare soil</span><span>0.2 sparse</span><span>0.5 healthy crop</span><span>0.9 dense canopy</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- 01 ABOUT -->
+<section class="block" id="about">
+  <div class="wrap">
+    <div class="label"><span class="plot">Plot 01</span><span class="name">About</span></div>
+    <div>
+      <h2>Who <i>am I</i></h2>
+      <p class="lede">An agricultural engineer moving from the plant floor to the <em>whole food chain</em>, with the data skills to measure it.</p>
+      <div class="prose">
+        <p>I'm an MSc student in Sustainable Development, Agri-Food &amp; Co-operatives at University College Cork, with a B.Tech in Agricultural Engineering from Anna University. My four internships took me through a farmer-owned co-operative, grain processing, irrigation products and cement plant operations.</p>
+        <p>I combine engineering, GIS and carbon data skills with hands-on work alongside farmers, suppliers and frontline teams. I'm eligible to work in Ireland with no sponsorship required, and I speak English (fluent), Tamil (native) and Hindi (basic).</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 02 NOW -->
+<section class="block" id="now">
+  <div class="wrap">
+    <div class="label"><span class="plot">Plot 02</span><span class="name">Right now</span></div>
+    <div>
+      <h2>What I'm <i>doing now</i></h2>
+      <div class="triad">
+        <div><span class="mono">Studying</span><h3>MSc at University College Cork</h3><p>Sustainable Development, Agri-Food &amp; Co-operatives, building on my engineering degree.</p></div>
+        <div><span class="mono">Building</span><h3>A supply chain carbon dashboard</h3><p>Modelling transport emissions for an agri-food logistics network in Power BI.</p></div>
+        <div><span class="mono">Looking for</span><h3>Graduate sustainability roles</h3><p>Farm sustainability, environmental consulting and agri-tech / GIS roles across Cork and Munster.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 03 SKILLS -->
+<section class="block" id="skills">
+  <div class="wrap">
+    <div class="label"><span class="plot">Plot 03</span><span class="name">Toolkit</span></div>
+    <div>
+      <h2>What are <i>my skills</i></h2>
+      <div class="ledger">
+        <div><h3>Sustainability &amp; GIS</h3><ul><li>GHG Protocol (Scope 3)</li><li>Carbon accounting</li><li>Life cycle assessment</li><li>ArcGIS Pro</li><li>Remote sensing (NDVI)</li><li>Riparian buffer design</li></ul></div>
+        <div><h3>Data &amp; Tools</h3><ul><li>Power BI (DAX)</li><li>Excel: Pivots, VLOOKUP</li><li>SAP · SCM fundamentals</li><li>Python (basic)</li><li>IoT sensors (Arduino)</li></ul></div>
+        <div><h3>Operations</h3><ul><li>KPI &amp; TAT tracking</li><li>Variance reporting</li><li>Inbound &amp; outbound logistics</li><li>Inventory management</li><li>Vendor coordination</li><li>Root-cause problem solving</li></ul></div>
+        <div><h3>Ways of working</h3><ul><li>Farmer &amp; supplier communication</li><li>Stakeholder communication</li><li>Cross-functional coordination</li><li>Analytical thinking</li><li>Team leadership</li></ul></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 04 EXPERIENCE -->
+<section class="block" id="experience">
+  <div class="wrap">
+    <div class="label"><span class="plot">Plot 04</span><span class="name">Experience</span></div>
+    <div>
+      <h2>Where <i>I've worked</i></h2>
+      <div class="jobs">
+        <article class="job">
+          <span class="mono num">May 2025 –<br>Feb 2026</span>
+          <div>
+            <h3>Dalmia Cement</h3>
+            <p class="role">Operations &amp; Supply Chain Intern · India</p>
+            <ul>
+              <li>Monitored daily output, turnaround time (TAT) and KPIs against targets, flagging variances to production teams.</li>
+              <li>Kept daily records in SAP and Excel, using VLOOKUP checks to catch billing and quality data mismatches before reporting.</li>
+              <li>Supported logistics planning, transport coordination and inventory management.</li>
+            </ul>
+          </div>
+          <div class="tags"><span class="tag">SAP</span><span class="tag">Excel</span><span class="tag">KPI / TAT</span><span class="tag">Variance</span></div>
+        </article>
+        <article class="job">
+          <span class="mono num">Oct 2024 –<br>Mar 2025</span>
+          <div>
+            <h3>Farmer Producer Organisation</h3>
+            <p class="role">Intern · India</p>
+            <ul><li>Supported daily operations of a farmer-owned co-operative: collective marketing, market linkages and the flow of produce from farm to buyer.</li></ul>
+          </div>
+          <div class="tags"><span class="tag">Co-ops</span><span class="tag">Market linkages</span></div>
+        </article>
+        <article class="job">
+          <span class="mono num">Feb 2024 –<br>Jul 2024</span>
+          <div>
+            <h3>Bunge India Pvt. Ltd.</h3>
+            <p class="role">Grain Processing Intern · India</p>
+            <ul><li>Scheduled inbound raw-material flow and daily stock updates in a large oilseed and grain facility, aligning receipts with production.</li></ul>
+          </div>
+          <div class="tags"><span class="tag">Inbound</span><span class="tag">Inventory</span></div>
+        </article>
+        <article class="job">
+          <span class="mono num">Aug 2023 –<br>Dec 2023</span>
+          <div>
+            <h3>STIHL Pumps</h3>
+            <p class="role">Irrigation Solutions Intern · India</p>
+            <ul>
+              <li>Coordinated dispatch schedules and kept stock-movement and quality-inspection records.</li>
+              <li>Supported testing and demonstrations of drip and sprinkler pump systems for farmers.</li>
+            </ul>
+          </div>
+          <div class="tags"><span class="tag">Dispatch</span><span class="tag">Quality</span><span class="tag">Farmer demos</span></div>
+        </article>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 05 PRACTICE -->
+<section class="block" id="practice">
+  <div class="wrap">
+    <div class="label"><span class="plot">Plot 05</span><span class="name">In practice</span></div>
+    <div>
+      <h2>How I use my skills <i>in real work</i></h2>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th>Skill</th><th>Where</th><th>What it achieved</th></tr></thead>
+          <tbody>
+            <tr><td>Power BI + GHG Protocol</td><td>MSc project, UCC</td><td>Carbon KPIs showing a potential <span class="hl num">~90%</span> emissions cut</td></tr>
+            <tr><td>ArcGIS Pro + NDVI</td><td>B.Tech thesis</td><td>Buffer zones projected to cut nitrogen runoff risk by <span class="hl num">18%</span></td></tr>
+            <tr><td>Co-op operations</td><td>Farmer Producer Organisation</td><td>Supported collective marketing from farm to buyer</td></tr>
+            <tr><td>KPI &amp; TAT tracking</td><td>Dalmia Cement</td><td>Flagged variances so production teams could correct them</td></tr>
+            <tr><td>Excel (VLOOKUP checks)</td><td>Dalmia Cement</td><td>Caught billing and quality data mismatches before reporting</td></tr>
+            <tr><td>Inbound scheduling</td><td>Bunge India</td><td>Aligned raw-material receipts with production requirements</td></tr>
+            <tr><td>Dispatch &amp; quality records</td><td>STIHL Pumps</td><td>Accurate inventory tracking for product dispatch</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 06 PROJECTS -->
+<section class="block" id="projects">
+  <div class="wrap">
+    <div class="label"><span class="plot">Plot 06</span><span class="name">Projects</span></div>
+    <div>
+      <h2>Projects with <i>measured results</i></h2>
+      <article class="proj">
+        <div>
+          <span class="mono">MSc project · University College Cork · 2026</span>
+          <h3>Supply Chain Carbon Optimisation Dashboard</h3>
+          <p>Modelled transport emissions for a regional agri-food logistics network using the GHG Protocol (Scope 3, Category 4). I cleaned raw fuel-consumption data and built a Power BI dashboard with DAX-based carbon KPIs in gCO₂e per litre of product, then modelled a fleet switch from diesel to HVO biofuel.</p>
+          <div class="tools"><span class="tag">Power BI</span><span class="tag">DAX</span><span class="tag">GHG Protocol</span><span class="tag">Excel</span></div>
+        </div>
+        <div class="figure"><span class="big num">~90%</span><span class="unit">potential cut in lifecycle emissions with HVO biofuel</span></div>
+      </article>
+      <article class="proj">
+        <div>
+          <span class="mono">B.Tech thesis · 2026</span>
+          <h3>GIS-Based Precision Agriculture Land Assessment</h3>
+          <p>Mapped NDVI and soil moisture from satellite imagery in ArcGIS Pro and analysed runoff paths across the farmland. Designed <span class="num">30 m</span> riparian buffer zones and flagged high-risk pasture for conservation.</p>
+          <div class="tools"><span class="tag">ArcGIS Pro</span><span class="tag">NDVI</span><span class="tag">Remote sensing</span></div>
+        </div>
+        <div class="figure"><span class="big num">18%</span><span class="unit">projected cut in nitrogen runoff risk</span></div>
+      </article>
+      <article class="proj">
+        <div>
+          <span class="mono">Smart India Hackathon · 2025</span>
+          <h3>Portable Grain Storage Bin</h3>
+          <p>Designed a collapsible storage bin made from recycled materials, with passive climate control for small farms.</p>
+          <div class="tools"><span class="tag">Product design</span><span class="tag">Post-harvest</span></div>
+        </div>
+        <div class="figure"><span class="big num">1,000<small style="font-size:.4em"> kg</small></span><span class="unit">storage capacity for smallholder farmers</span></div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- 07 NEXT -->
+<section class="block" id="next">
+  <div class="wrap">
+    <div class="label"><span class="plot">Plot 07</span><span class="name">Planned</span></div>
+    <div>
+      <h2>What I'm <i>building next</i></h2>
+      <div class="plans">
+        <div class="plan"><div class="status"><span class="mono">Planned</span><span class="mono">GIS + engineering</span></div><h3>Catchment runoff &amp; ASSAP mitigation map</h3><p>Overlay EPA water-quality and land-use data for a Munster catchment, such as the River Bandon, in QGIS, then design buffer strips and sediment traps.</p><p class="builds">Builds on my B.Tech GIS thesis</p></div>
+        <div class="plan"><div class="status"><span class="mono">Planned</span><span class="mono">Engineering + co-ops</span></div><h3>West Cork dairy co-op biogas cluster</h3><p>Model a shared anaerobic digestion plant for <span class="num">15–20</span> dairy farms: slurry and silage feedstock, methane yield and a co-op profit-sharing structure.</p><p class="builds">Builds on my engineering degree and MSc</p></div>
+        <div class="plan"><div class="status"><span class="mono">Planned</span><span class="mono">Data + carbon</span></div><h3>Dairy farm decarbonisation dashboard</h3><p>Compare the cost per tonne of CO₂e abated for protected urea, multi-species swards, solar PV and low-emission slurry spreading.</p><p class="builds">Builds on my carbon dashboard</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 08 VALUE -->
+<section class="block" id="value">
+  <div class="wrap">
+    <div class="label"><span class="plot">Plot 08</span><span class="name">Value</span></div>
+    <div>
+      <h2>What I'll bring <i>to your team</i></h2>
+      <div class="values">
+        <div class="value"><span class="n">01</span><div><h3>Engineering for sustainability</h3><p>Practical design skills, from riparian buffer zones to storage bins and pump systems.</p></div></div>
+        <div class="value"><span class="n">02</span><div><h3>GIS &amp; carbon data</h3><p>ArcGIS mapping, NDVI and GHG Protocol accounting, turned into clear Power BI dashboards.</p></div></div>
+        <div class="value"><span class="n">03</span><div><h3>Co-op &amp; farmer experience</h3><p>I've worked inside a farmer-owned co-operative and demonstrated equipment to farmers.</p></div></div>
+        <div class="value"><span class="n">04</span><div><h3>Data you can trust</h3><p>I check numbers before they're reported, as I did with SAP and Excel records at Dalmia Cement.</p></div></div>
+        <div class="value"><span class="n">05</span><div><h3>Supply chain know-how</h3><p>Logistics, inventory and dispatch experience across four industry internships.</p></div></div>
+        <div class="value"><span class="n">06</span><div><h3>Ready to start in Munster</h3><p>Based in Cork, available immediately and eligible to work in Ireland with no sponsorship.</p></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 09 CREDENTIALS -->
+<section class="block" id="credentials">
+  <div class="wrap">
+    <div class="label"><span class="plot">Plot 09</span><span class="name">Credentials</span></div>
+    <div>
+      <h2>Certifications <i>&amp; achievements</i></h2>
+      <div class="creds">
+        <div>
+          <h3>Certifications</h3>
+          <ul>
+            <li>Supply Chain Management Fundamentals <span>Coursera / Internshala · 2025</span></li>
+            <li>Basics of SAP SCM <span>ACTE, Chennai · 2025</span></li>
+            <li>Introduction to Data Analysis <span>Coursera</span></li>
+            <li>Microsoft Excel for Data Analytics <span>LinkedIn Learning</span></li>
+            <li>Diploma in Computer Applications <span>DCA</span></li>
+          </ul>
+        </div>
+        <div>
+          <h3>Achievements</h3>
+          <ul>
+            <li>Team leadership in college project development <span>Recognised</span></li>
+            <li>Agri-innovations showcased at Agri Index <span>Coimbatore · 2024</span></li>
+            <li>Portable grain storage bin <span>Smart India Hackathon · 2025</span></li>
+            <li>B.Tech CGPA 8.70 / 10 <span>Anna University</span></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 10 CONTACT -->
+<section class="contact" id="contact">
+  <div class="wrap">
+    <span class="mono">Plot 10 · Contact</span>
+    <h2>Let's work <i>together.</i></h2>
+    <a class="mail" href="mailto:deebhaanbalagan@gmail.com">deebhaanbalagan@gmail.com</a>
+    <div class="clist">
+      <div><span class="mono">Phone</span><a class="num" href="tel:+353851732196">+353 85 173 2196</a></div>
+      <div><span class="mono">LinkedIn</span><a href="https://linkedin.com/in/deebha16">linkedin.com/in/deebha16</a></div>
+      <div><span class="mono">Location</span><span>Cork, Ireland · open to relocation</span></div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <span class="mono">© 2026 Deebha Anbalagan</span>
+    <span class="mono">Agri-Food Sustainability · Supply Chain · GIS</span>
+  </div>
+</footer>
+
+<script>
+  // Topographic contour lines behind the hero, drawn once (and on resize).
+  (function(){
+    var c = document.getElementById('contours');
+    if(!c || !c.getContext) return;
+    var ctx = c.getContext('2d');
+    function draw(){
+      var r = c.getBoundingClientRect();
+      var dpr = window.devicePixelRatio || 1;
+      c.width = r.width * dpr; c.height = r.height * dpr;
+      ctx.setTransform(dpr,0,0,dpr,0,0);
+      ctx.clearRect(0,0,r.width,r.height);
+      var hills = [
+        {x:r.width*0.86, y:r.height*0.30, rings:16, step:26, seed:1.3},
+        {x:r.width*0.58, y:r.height*1.05, rings:12, step:30, seed:2.7}
+      ];
+      hills.forEach(function(h){
+        for(var k=1;k<=h.rings;k++){
+          ctx.beginPath();
+          for(var i=0;i<=200;i++){
+            var t = i/200*Math.PI*2;
+            var wob = 1 + 0.09*Math.sin(3*t + h.seed + k*0.21) + 0.05*Math.sin(5*t - h.seed*2 + k*0.13) + 0.03*Math.sin(8*t + k*0.4);
+            var rad = k*h.step*wob;
+            var px = h.x + Math.cos(t)*rad*1.25, py = h.y + Math.sin(t)*rad*0.85;
+            i===0 ? ctx.moveTo(px,py) : ctx.lineTo(px,py);
+          }
+          ctx.closePath();
+          ctx.strokeStyle = k % 5 === 0 ? 'rgba(30,107,69,0.30)' : 'rgba(30,107,69,0.13)';
+          ctx.lineWidth = k % 5 === 0 ? 1.2 : 0.8;
+          ctx.stroke();
+        }
+      });
+    }
+    draw();
+    var t; window.addEventListener('resize', function(){ clearTimeout(t); t = setTimeout(draw, 150); });
+  })();
+</script>
+</body>
+</html>
